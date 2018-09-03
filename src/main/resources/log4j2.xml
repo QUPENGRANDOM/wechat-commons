@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="ERROR" monitorInterval="30">
+    <Properties>
+        <Property name="baseDir">/var/lib/tomcat8/logs</Property>
+        <Property name="debugFilePattern">${baseDir}/$${date:yyyy-MM}/debug-%d{yyyy-MM-dd}-%i.log.gz</Property>
+        <Property name="infoFilePattern">${baseDir}/$${date:yyyy-MM}/info-%d{MM-yyyy}-%i.log.gz</Property>
+        <Property name="extFilePattern">${baseDir}/$${date:yyyy-MM}/ext-%d{MM-dd-yyyy}-%i.log.gz</Property>
+        <Property name="patternLayout">%d{yyyy-MM-dd HH:mm:ss.SSS z} [%5pid:%5tid] %-5level %class{36} %M: %L : %msg%xEx%n</Property>
+        <Property name="infoPatternLayout">%d{yyyy-MM-dd HH:mm:ss.SSS z} %-5level %msg%xEx %class{36} %M: %L %n</Property>
+    </Properties>
+    <appenders>
+        <Console name="console" target="SYSTEM_OUT">
+            <ThresholdFilter level="trace" onMatch="ACCEPT" onMismatch="DENY"/>
+            <PatternLayout pattern="${patternLayout}"/>
+        </Console>
+        <!--文件会打印出所有信息，这个log每次运行程序会自动清空，由append属性决定，这个也挺有用的，适合临时测试用-->
+        <!--<File name="log" fileName="${baseDir}/test.log" append="false">-->
+        <!--<PatternLayout pattern="%d{HH:mm:ss.SSS} %-5level %class{36} %L %M - %msg%xEx%n"/>-->
+        <!--</File>-->
+        <!-- 这个会打印出所有的信息，每次大小超过size，则这size大小的日志会自动存入按年份-月份建立的文件夹下面并进行压缩，作为存档-->
+        <RollingFile name="debugLog" fileName="${baseDir}/debug.log"
+                     filePattern="${debugFilePattern}">
+            <PatternLayout pattern="${patternLayout}"/>
+            <Filters>
+                <!--<MarkerFilter marker="debug" onMatch="ACCEPT" onMismatch="DENY" />-->
+                <MarkerFilter marker="info" onMatch="DENY" onMismatch="ACCEPT" /><!--Temporary solution, so that we don't need to change old logging code-->
+                <BurstFilter level="debug" rate="16" maxBurst="100"/>
+            </Filters>
+            <Policies>
+                <SizeBasedTriggeringPolicy size="50 MB"/>
+                <TimeBasedTriggeringPolicy />
+            </Policies>
+            <DefaultRolloverStrategy>
+                <Delete basePath="${baseDir}" maxDepth="2">
+                    <IfFileName glob="*/app-*.log.gz" />
+                    <IfLastModified age="60d" />
+                </Delete>
+            </DefaultRolloverStrategy>
+        </RollingFile>
+        <RollingFile name="infoLog" fileName="${baseDir}/info.log"
+                     filePattern="${infoFilePattern}">
+            <MarkerFilter marker="info" onMatch="ACCEPT" onMismatch="DENY"/>
+            <PatternLayout pattern="${infoPatternLayout}"/>
+            <Policies>
+                <SizeBasedTriggeringPolicy size="50 MB"/>
+                <TimeBasedTriggeringPolicy interval="30"/>
+            </Policies>
+            <DefaultRolloverStrategy/>
+        </RollingFile>
+        <RollingFile name="extLog" fileName="${baseDir}/ext.log"
+                     filePattern="${extFilePattern}">
+            <PatternLayout pattern="${patternLayout}"/>
+            <Policies>
+                <SizeBasedTriggeringPolicy size="50 MB"/>
+                <TimeBasedTriggeringPolicy />
+            </Policies>
+            <DefaultRolloverStrategy/>
+        </RollingFile>
+    </appenders>
+    <Loggers>
+        <logger name="com.boyuecorp" level="DEBUG" additivity="false" >
+            <AppenderRef ref="debugLog"/>
+            <AppenderRef ref="infoLog"/>
+            <AppenderRef ref="console"/>
+        </logger>
+        <Root level="trace">
+            <AppenderRef ref="extLog"/>
+            <AppenderRef ref="console"/>
+        </Root>
+    </Loggers>
+</Configuration>

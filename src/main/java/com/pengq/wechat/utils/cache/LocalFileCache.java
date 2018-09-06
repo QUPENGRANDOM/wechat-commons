@@ -37,7 +37,7 @@ public class LocalFileCache implements Cache {
             while ((line = reader.readLine()) != null) {
                 if (line.startsWith(EXPIRE_PREFIX)) {
                     long expireAtTime = Long.parseLong(line.substring(7).trim());
-                    isExpired = expireAtTime != 0L && (new Date(expireAtTime)).after(new Date());
+                    isExpired = expireAtTime != 0L && (new Date(expireAtTime)).before(new Date());
                 } else {
                     sb.append(line);
                 }

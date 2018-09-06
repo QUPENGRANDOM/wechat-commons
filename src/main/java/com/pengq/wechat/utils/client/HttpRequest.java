@@ -1,4 +1,4 @@
-package com.pengq.wechat.utils;
+package com.pengq.wechat.utils.client;
 
 import com.alibaba.fastjson.JSON;
 import org.apache.http.HttpEntity;

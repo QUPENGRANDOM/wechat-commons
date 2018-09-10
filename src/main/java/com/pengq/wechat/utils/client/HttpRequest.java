@@ -21,7 +21,7 @@ import java.util.Map;
 public class HttpRequest {
     private static final Logger logger = LoggerFactory.getLogger(HttpRequest.class);
 
-    public static <T> T httpGet(String url, HashMap<String, String> parameters, Class<T> clazz) throws URISyntaxException, IOException {
+    public static String httpGet(String url, HashMap<String, String> parameters) throws URISyntaxException, IOException {
         URIBuilder builder = new URIBuilder(url);
         if (parameters != null && !parameters.isEmpty()) {
             for (Map.Entry<String, String> entry : parameters.entrySet()) {
@@ -33,16 +33,16 @@ public class HttpRequest {
         String response = EntityUtils.toString(entity, StandardCharsets.UTF_8);
         logger.info("RESPONSE:{}", response);
 
-        return JSON.parseObject(response, clazz);
+        return response;
     }
 
-    public static <T> T httpPost(String url, HashMap<String, String> body, Class<T> clazz) throws URISyntaxException, IOException {
+    public static String httpPost(String url, HashMap<String, String> body) throws URISyntaxException, IOException {
         URIBuilder builder = new URIBuilder(url);
         logger.info("URL:{}", builder.toString());
         HttpEntity entity = Request.Post(builder.build()).bodyString(JSON.toJSONString(body), ContentType.APPLICATION_JSON).execute().returnResponse().getEntity();
         String response = EntityUtils.toString(entity, StandardCharsets.UTF_8);
         logger.info("RESPONSE:{}", response);
 
-        return JSON.parseObject(response, clazz);
+        return response;
     }
 }
